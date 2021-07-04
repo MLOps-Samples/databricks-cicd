@@ -60,8 +60,8 @@ jobs:
           DATABRICKS_OUTFILE_PATH: "."
         shell: bash -l {0}
         run: |
-          echo '"cluster_id": "${DATABRICKS_CLUSTERID}"'
-          echo '{"host": "${DATABRICKS_URL}","token": "${DATABRICKS_TOKEN}","cluster_id": "${DATABRICKS_CLUSTERID}"}' >> ~/.databricks-connect
+          echo "\"cluster_id\": \"${DATABRICKS_CLUSTERID}\""
+          echo "{\"host\": \"${DATABRICKS_URL}\",\"token\": \"${DATABRICKS_TOKEN}\",\"cluster_id\": \"${DATABRICKS_CLUSTERID}\"}" > ~/.databricks-connect
           pytest --cache-clear --cov=src test/ 2>&1 | tee pytest-coverage.txt
 
       - name: Comment coverage
