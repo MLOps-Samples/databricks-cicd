@@ -1,35 +1,20 @@
-# This is a basic workflow that is manually triggered
+name: CI
 
-name: Manual workflow
-
-# Controls when the action will run. Workflow runs when manually triggered using the UI
-# or API.
 on:
-  workflow_dispatch:
-    # Inputs the workflow accepts.
-    inputs:
-      name:
-        # Friendly description to be shown in the UI instead of 'name'
-        description: "Person to greet"
-        # Default value if no value is explicitly provided
-        default: "World"
-        # Input has to be provided for the workflow to run
-        required: true
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
 jobs:
-  # This workflow contains a single job called "greet"
-  greet:
+  build:
     environment: Databricks_Azure_Test
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Runs a single command using the runners shell
-      - name: Send greeting
-        run: echo "Hello ${{ github.event.inputs.name }}"
-
       - name: Checkout code
         uses: actions/checkout@v2
 
@@ -60,7 +45,6 @@ jobs:
           DATABRICKS_OUTFILE_PATH: "."
         shell: bash -l {0}
         run: |
-          echo "\"cluster_id\": \"${DATABRICKS_CLUSTERID}\""
           echo "{\"host\": \"${DATABRICKS_URL}\",\"token\": \"${DATABRICKS_TOKEN}\",\"cluster_id\": \"${DATABRICKS_CLUSTERID}\"}" > ~/.databricks-connect
           pytest --cache-clear --cov=src test/ 2>&1 | tee pytest-coverage.txt
 

@@ -10,7 +10,7 @@ def execute_notebook(
     name = notebook_name
     full_workspace_path = os.path.join(workspace_path, name)
 
-    print("Running job for:" + full_workspace_path)
+    print("Running job for:" + name)
     values = {
         "run_name": name,
         "existing_cluster_id": clusterid,
