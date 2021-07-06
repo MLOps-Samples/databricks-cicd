@@ -9,6 +9,11 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
+env:
+  DATABRICKS_URL: ${{ secrets.DATABRICKS_URL }}
+  DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+  DATABRICKS_CLUSTERID: ${{ secrets.DATABRICKS_CLUSTERID }}
+
 jobs:
   build:
     environment: Databricks_Azure_Test
@@ -36,19 +41,53 @@ jobs:
           flake8
           black .
 
-      - name: Run pytest
+      - name: Run unit tests
         env:
-          DATABRICKS_URL: ${{ secrets.DATABRICKS_URL }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          DATABRICKS_CLUSTERID: ${{ secrets.DATABRICKS_CLUSTERID }}
-          DATABRICKS_WORKSPACE_PATH: ${{ secrets.DATABRICKS_WORKSPACE_PATH }}
           DATABRICKS_OUTFILE_PATH: "."
         shell: bash -l {0}
         run: |
           echo "{\"host\": \"${DATABRICKS_URL}\",\"token\": \"${DATABRICKS_TOKEN}\",\"cluster_id\": \"${DATABRICKS_CLUSTERID}\"}" > ~/.databricks-connect
-          pytest --cache-clear --cov=src test/ 2>&1 | tee pytest-coverage.txt
+          pip install -e src/
+          pytest --cache-clear --cov=src test/unittests 2>&1 | tee pytest-coverage.txt
 
-      - name: Comment coverage
+      - name: Comment coverage for pull requests
         uses: coroo/pytest-coverage-commentator@v1.0.2
         with:
           pytest-coverage: pytest-coverage.txt
+
+      - name: Run integration tests
+        env:
+          DATABRICKS_DBFS_PATH: dbfs:/mnt/databrickscicd/Testing
+          DATABRICKS_WORKSPACE_PATH: /databrickscicd/Testing
+        shell: bash -l {0}
+        run: |
+          echo "[DEFAULT]\nhost=${DATABRICKS_URL}\ntoken=${DATABRICKS_TOKEN}\n" > ~/.databrickscfg
+          python -m build --wheel src
+          name=$(cd src/dist; ls databrickscicd*.whl)
+          databricks fs cp --overwrite src/dist/${name} ${DATABRICKS_DBFS_PATH}
+          databricks libraries install --cluster-id ${DATABRICKS_CLUSTER_ID} --whl ${DATABRICKS_DBFS_PATH}/${name}
+          databricks workspace import --overwrite src/main_notebook.py --language PYTHON ${DATABRICKS_WORKSPACE_PATH}/main_notebook.py
+          pytest --cache-clear test/test_main_notebook.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: libs_and_notebooks
+          path: |
+            src/dist/databrickscicd*.whl
+            src/main_notebook.py
+
+  deploy:
+    environment: Databricks_Azure_Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: libs_and_notebooks
+
+      - name: Create a job. Deploy lib and notebook to Databricks
+        shell: bash -l {0}
+        run: |
+          echo "[DEFAULT]\nhost=${DATABRICKS_URL}\ntoken=${DATABRICKS_TOKEN}\n" > ~/.databrickscfg

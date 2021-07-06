@@ -5,14 +5,19 @@ import time
 
 
 def execute_notebook(
-    shard, token, clusterid, notebook_name, workspace_path, outfile_path
+    shard,
+    token,
+    clusterid,
+    notebook_name,
+    local_path,
+    workspace_path,
+    outfile_path,  # noqa: E501
 ):
-    name = notebook_name
-    full_workspace_path = os.path.join(workspace_path, name)
+    full_workspace_path = os.path.join(workspace_path, notebook_name)
 
-    print("Running job for:" + name)
+    print("Running job for:" + notebook_name)
     values = {
-        "run_name": name,
+        "run_name": notebook_name,
         "existing_cluster_id": clusterid,
         "timeout_seconds": 3600,
         "notebook_task": {"notebook_path": full_workspace_path},
