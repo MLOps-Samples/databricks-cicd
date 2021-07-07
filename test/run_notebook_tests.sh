@@ -4,7 +4,6 @@ set -e
 
 python -m build --wheel src
 name=$(cd src/dist; ls databrickscicd*.whl)
-databricks configure --host ${DATABRICKS_URL} --token ${DATABRICKS_TOKEN}
 databricks fs mkdirs ${DATABRICKS_DBFS_PATH}
 export DATABRICKS_LIBRARY_PATH=${DATABRICKS_DBFS_PATH}/${name}
 databricks fs cp --overwrite src/dist/${name} ${DATABRICKS_DBFS_PATH}

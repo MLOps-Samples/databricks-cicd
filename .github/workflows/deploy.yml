@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event.pull_request.merged
     env:
-      DATABRICKS_URL: ${{ secrets.DATABRICKS_URL }}
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
     steps:
@@ -43,7 +43,6 @@ jobs:
           DATABRICKS_WORKSPACE_PATH: /databrickscicd/Production
         shell: bash -l {0}
         run: |
-          echo "[DEFAULT]\nhost=${DATABRICKS_URL}\ntoken=${DATABRICKS_TOKEN}\n" > ~/.databrickscfg
           name=$(cd src/dist; ls databrickscicd*.whl)
           databricks fs cp --overwrite src/dist/${name} ${DATABRICKS_DBFS_PATH}
           databricks workspace import --overwrite src/main_notebook.py --language PYTHON ${DATABRICKS_WORKSPACE_PATH}/main_notebook.py

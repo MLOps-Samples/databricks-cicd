@@ -8,7 +8,7 @@ from execute_notebook import *  # noqa: F403, E402
 
 def test_main():
     load_dotenv()
-    shard = os.environ["DATABRICKS_URL"]
+    shard = os.environ["DATABRICKS_HOST"]
     token = os.environ["DATABRICKS_TOKEN"]
     workspace_path = os.environ["DATABRICKS_WORKSPACE_PATH"]
     library_path = os.environ["DATABRICKS_LIBRARY_PATH"]
