@@ -1,4 +1,4 @@
-name: CI
+name: Build_Test
 
 on:
   push:
@@ -13,6 +13,10 @@ jobs:
   build:
     environment: Databricks_Azure_Test
     runs-on: ubuntu-latest
+    env:
+      DATABRICKS_URL: ${{ secrets.DATABRICKS_URL }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+      DATABRICKS_CLUSTERID: ${{ secrets.DATABRICKS_CLUSTERID }}
 
     steps:
       - name: Checkout code
@@ -36,19 +40,32 @@ jobs:
           flake8
           black .
 
-      - name: Run pytest
+      - name: Run unit tests
         env:
-          DATABRICKS_URL: ${{ secrets.DATABRICKS_URL }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          DATABRICKS_CLUSTERID: ${{ secrets.DATABRICKS_CLUSTERID }}
-          DATABRICKS_WORKSPACE_PATH: ${{ secrets.DATABRICKS_WORKSPACE_PATH }}
           DATABRICKS_OUTFILE_PATH: "."
         shell: bash -l {0}
         run: |
           echo "{\"host\": \"${DATABRICKS_URL}\",\"token\": \"${DATABRICKS_TOKEN}\",\"cluster_id\": \"${DATABRICKS_CLUSTERID}\"}" > ~/.databricks-connect
-          pytest --cache-clear --cov=src test/ 2>&1 | tee pytest-coverage.txt
+          pip install -e src/
+          pytest --cache-clear --cov=src test/unittests 2>&1 | tee pytest-coverage.txt
 
-      - name: Comment coverage
+      - name: Comment coverage for pull requests
         uses: coroo/pytest-coverage-commentator@v1.0.2
         with:
           pytest-coverage: pytest-coverage.txt
+
+      - name: Run integration tests
+        env:
+          DATABRICKS_DBFS_PATH: dbfs:/mnt/databrickscicd/Testing
+          DATABRICKS_WORKSPACE_PATH: /databrickscicd/Testing
+        shell: bash -l {0}
+        run: |
+          echo "[DEFAULT]\nhost=${DATABRICKS_URL}\ntoken=${DATABRICKS_TOKEN}\n" > ~/.databrickscfg
+          test/run_notebook_tests.sh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheel_lib
+          path: |
+            src/dist/*.whl

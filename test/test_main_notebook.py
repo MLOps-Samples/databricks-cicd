@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 sys.path.append("./")
-from libs.execute_notebook import *  # noqa: F403, E402
+from execute_notebook import *  # noqa: F403, E402
 
 
 def test_main():
