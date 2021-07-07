@@ -1,0 +1,52 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    environment: Databricks_Azure_Production
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged
+    env:
+      DATABRICKS_URL: ${{ secrets.DATABRICKS_URL }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: wheel_lib
+
+      - name: Setup Python
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: 3.7
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v2.1.1
+        with:
+          environment-file: environment.yml
+          activate-environment: databricks_cicd
+          python-version: 3.7
+
+      - name: Deploy lib and notebook to Databricks
+        env:
+          DATABRICKS_DBFS_PATH: dbfs:/mnt/databrickscicd/Production
+          DATABRICKS_WORKSPACE_PATH: /databrickscicd/Production
+        shell: bash -l {0}
+        run: |
+          echo "[DEFAULT]\nhost=${DATABRICKS_URL}\ntoken=${DATABRICKS_TOKEN}\n" > ~/.databrickscfg
+          name=$(cd src/dist; ls databrickscicd*.whl)
+          databricks fs cp --overwrite src/dist/${name} ${DATABRICKS_DBFS_PATH}
+          databricks workspace import --overwrite src/main_notebook.py --language PYTHON ${DATABRICKS_WORKSPACE_PATH}/main_notebook.py
+          sed -i "s|__DATABRICKS_CICD_LIBRARY__|${DATABRICKS_DBFS_PATH}/${name}|g" src/db_job.json
+          sed -i "s|__DATABRICKS_CICD_NOTEBOOK__|${DATABRICKS_WORKSPACE_PATH}/main_notebook.py|g" src/db_job.json
+          databricks jobs create --json-file src/db_job.json

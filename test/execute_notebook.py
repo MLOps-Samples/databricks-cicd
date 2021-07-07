@@ -9,7 +9,6 @@ def execute_notebook(
     token,
     clusterid,
     notebook_name,
-    local_path,
     workspace_path,
     outfile_path,  # noqa: E501
 ):
