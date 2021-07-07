@@ -7,7 +7,7 @@ import time
 def execute_notebook(
     shard,
     token,
-    clusterid,
+    library_path,
     notebook_name,
     workspace_path,
     outfile_path,  # noqa: E501
@@ -17,7 +17,26 @@ def execute_notebook(
     print("Running job for:" + notebook_name)
     values = {
         "run_name": notebook_name,
-        "existing_cluster_id": clusterid,
+        "new_cluster": {
+            "spark_version": "7.3.x-scala2.12",
+            "spark_conf": {
+                "spark.master": "local[*, 4]",
+                "spark.databricks.cluster.profile": "singleNode",
+            },
+            "num_workers": 1,
+            "azure_attributes": {
+                "availability": "ON_DEMAND_AZURE",
+                "first_on_demand": 1,
+                "spot_bid_max_price": -1,
+            },
+            "node_type_id": "Standard_DS3_v2",
+            "custom_tags": {"ResourceClass": "SingleNode"},
+            "spark_env_vars": {
+                "PYSPARK_PYTHON": "/databricks/python3/bin/python3"
+            },  # noqa: E501
+            "enable_elastic_disk": True,
+        },
+        "libraries": [{"whl": library_path}],
         "timeout_seconds": 3600,
         "notebook_task": {"notebook_path": full_workspace_path},
     }
@@ -49,7 +68,7 @@ def execute_notebook(
         runid = j["run_id"]
         if (
             current_state in ["TERMINATED", "INTERNAL_ERROR", "SKIPPED"]
-            or i >= 12  # noqa: E501
+            or i >= 60  # noqa: E501
         ):
             break
         i = i + 1
