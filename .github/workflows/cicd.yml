@@ -1,4 +1,4 @@
-name: Build_Test
+name: Build_Test_Deploy
 
 on:
   push:
@@ -103,7 +103,8 @@ jobs:
           DATABRICKS_WORKSPACE_PATH: /databrickscicd/Production
         shell: bash -l {0}
         run: |
-          name=$(cd src/dist; ls databrickscicd*.whl)
+          ls
+          name=$(ls databrickscicd*.whl)
           databricks fs cp --overwrite src/dist/${name} ${DATABRICKS_DBFS_PATH}
           databricks workspace import --overwrite src/main_notebook.py --language PYTHON ${DATABRICKS_WORKSPACE_PATH}/main_notebook.py
           sed -i "s|__DATABRICKS_CICD_LIBRARY__|${DATABRICKS_DBFS_PATH}/${name}|g" src/db_job.json
