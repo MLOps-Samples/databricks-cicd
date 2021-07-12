@@ -41,6 +41,7 @@ jobs:
           black .
 
       - name: Run unit tests
+        if: ${{ false }}
         shell: bash -l {0}
         run: |
           echo "{\"host\": \"${DATABRICKS_HOST}\",\"token\": \"${DATABRICKS_TOKEN}\",\"cluster_id\": \"${DATABRICKS_CLUSTERID}\"}" > ~/.databricks-connect
@@ -103,6 +104,7 @@ jobs:
           DATABRICKS_WORKSPACE_PATH: /databrickscicd/Production
         shell: bash -l {0}
         run: |
+          ls
           name=$(ls databrickscicd*.whl)
           databricks fs cp --overwrite ${name} ${DATABRICKS_DBFS_PATH}
           databricks workspace import --overwrite main_notebook.py --language PYTHON ${DATABRICKS_WORKSPACE_PATH}/main_notebook.py
