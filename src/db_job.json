@@ -6,6 +6,7 @@
             "spark.master": "local[*, 4]",
             "spark.databricks.cluster.profile": "singleNode"
         },
+        "num_workers": 1,
         "azure_attributes": {
             "availability": "ON_DEMAND_AZURE",
             "first_on_demand": 1,
