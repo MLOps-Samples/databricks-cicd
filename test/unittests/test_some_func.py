@@ -1,12 +1,6 @@
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from dbcicdlib.some_func import some_func
 
-# import sys
-
-# sys.path.append("/dbfs/mnt/databricks_cicd")
-# sys.path.append("./")
-# from src.libs.some_func import *  # noqa: F403, E402
-
 
 def test_some_func(spark):
     data = [("James", 3000), ("Michael", 4000)]

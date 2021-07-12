@@ -1,10 +1,10 @@
 name: Build_Test_Deploy
 
 on:
-  # push:
-  #   branches: [main]
-  # pull_request:
-  #   branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -41,7 +41,6 @@ jobs:
           black .
 
       - name: Run unit tests
-        if: ${{ false }}
         shell: bash -l {0}
         run: |
           echo "{\"host\": \"${DATABRICKS_HOST}\",\"token\": \"${DATABRICKS_TOKEN}\",\"cluster_id\": \"${DATABRICKS_CLUSTERID}\"}" > ~/.databricks-connect
@@ -75,7 +74,6 @@ jobs:
   deploy:
     environment: Databricks_Azure_Production
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged || github.event_name == 'workflow_dispatch'
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
