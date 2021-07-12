@@ -11,7 +11,7 @@ jobs:
   deploy:
     environment: Databricks_Azure_Production
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged
+    if: github.event.pull_request.merged || github.event.workflow_dispatch
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
