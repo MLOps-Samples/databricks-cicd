@@ -41,3 +41,7 @@ The sample contains a single notebook [main_notebook.py](src/main_notebook.py) w
 
 1. export $(cat .env | xargs)
 2. run_notebook_tests.sh
+
+## Alternative approaches
+
+1. Dev container with makefile
