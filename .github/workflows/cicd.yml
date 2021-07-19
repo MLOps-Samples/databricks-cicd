@@ -74,6 +74,7 @@ jobs:
 
   deploy:
     environment: Databricks_Azure_Production
+    needs: build
     runs-on: ubuntu-latest
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -120,5 +121,5 @@ jobs:
           then
             databricks jobs create --json-file src/db_job.json
           else
-            databricks jobs reset --job-id job_id --json-file src/db_job.json
+            databricks jobs reset --job-id $job_id --json-file src/db_job.json
           fi
