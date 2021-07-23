@@ -27,10 +27,16 @@ You can also run or debug Databricks Notebooks locally with Databricks Connect. 
 
 ### Run unit tests
 
-1. Set up Databricks Connect
-1. Local build and install package for development
-1. From the project root, run `pytest test/unittests`
-1. Set up VSCode to debug unit tests
+1. Set up Databricks Connect. Databricks Connect is already installed in the Conda environment mentioned in the Prereq section. It still needs to be configured as [documented](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect#requirements).
+2. Build a wheel package for development. When developing locally, rather than building the library code into a wheel package with every code change, you can Local build and install package for development.
+
+```bash
+cd src
+python -m build
+pip install --editable .
+```
+
+3. From the project root, run `pytest test/unittests`, or run tests in VSCode.
 
 ### Run integration tests
 
