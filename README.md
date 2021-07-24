@@ -28,7 +28,7 @@ You can also run or debug Databricks Notebooks locally with Databricks Connect. 
 ### Run unit tests
 
 1. Set up Databricks Connect. Databricks Connect is already installed in the Conda environment mentioned in the Prereq section. It still needs to be configured as [documented](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect#requirements).
-2. Build a wheel package for development. When developing locally, rather than building the library code into a wheel package with every code change, you can Local build and install package for development.
+2. Build a wheel package for development. When developing locally, rather than building the library code into a wheel package with every code change, you can build and install the package for development.
 
 ```bash
 cd src
@@ -40,8 +40,7 @@ pip install --editable .
 
 ### Run integration tests
 
-1. export $(cat .env | xargs)
-1. run_notebook_tests.sh
+1. Set the environment variables defined in .env: `export $(cat .env | xargs)`, then run [run_notebook_tests.sh](test/run_notebook_tests.sh).
 1. Deploy notebooks which test main_notebook, with asserts.
 1. Build and Install package to cluster.
 1. Run notebooks as job_submit.
