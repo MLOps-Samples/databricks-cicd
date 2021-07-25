@@ -1,6 +1,6 @@
 # Overview
 
-This sample demonstrates how to run unit tests on Python code using [Databricks Connect](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect) and integration tests on Databricks notebooks, all in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions).
+This sample demonstrates how to run unit tests on Python code using [Databricks Connect](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect), run integration tests on Databricks notebooks, and deploy a Databricks job, all in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions).
 
 The sample contains a single notebook [main_notebook.py](src/main_notebook.py) which calls [some_function](test/dbcicdlib/some_func.py) in a Python module. We run [unit test on some_function](test/unittests/test_some_func.py) and [integration test on main_notebook.py](test/run_notebook_tests.sh).
 
@@ -21,7 +21,7 @@ You can also run or debug Databricks Notebooks locally with Databricks Connect. 
 
 ### Prereq
 
-1. Set up a Conda environment for this project using [environment.yml](environment.yml):  `conda env create -f environment.yml`.
+1. Set up a Conda environment for this project using [environment.yml](environment.yml):  `conda env create -f environment.yml`. Then activate this environment.
 1. Install [Python Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.python) in VSCode, open the root folder of this project, and [set up the Python environment](https://code.visualstudio.com/docs/python/environments) by selecting the interpreter, linter, and configuring tests with PyTests.
 1. Copy [.env.sample](.env.sample) to your own `.env`, and set up the environment variables.
 
@@ -40,11 +40,5 @@ pip install --editable .
 
 ### Run integration tests
 
-1. Set the environment variables defined in .env: `export $(cat .env | xargs)`, then run [run_notebook_tests.sh](test/run_notebook_tests.sh).
-1. Deploy notebooks which test main_notebook, with asserts.
-1. Build and Install package to cluster.
-1. Run notebooks as job_submit.
-
-## Alternative approaches
-
-1. Dev container with makefile
+1. In a bash shell, set the environment variables defined in .env by running `export $(cat .env | xargs)`
+1. Run [run_notebook_tests.sh](test/run_notebook_tests.sh). This will build and install library code as a wheel package and run the notebook as one-time job run.
