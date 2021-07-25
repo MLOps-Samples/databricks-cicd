@@ -17,3 +17,4 @@ dependencies:
       - pre-commit==2.13
       - build==0.5
       - setuptools==57.1
+      - detect-secrets
