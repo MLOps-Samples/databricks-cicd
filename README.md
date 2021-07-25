@@ -1,5 +1,6 @@
 # Overview
 
+__What does this sample demonstrate:__
 This sample demonstrates how to run unit tests on Python code using [Databricks Connect](https://docs.microsoft.com/en-us/azure/databricks/dev-tools/databricks-connect), run integration tests on Databricks notebooks, and deploy a Databricks job, all in [GitHub Actions](https://docs.github.com/en/actions/learn-github-actions).
 
 The sample contains a single notebook [main_notebook.py](src/main_notebook.py) which calls [some_function](test/dbcicdlib/some_func.py) in a Python module. We run [unit test on some_function](test/unittests/test_some_func.py) and [integration test on main_notebook.py](test/run_notebook_tests.sh).
@@ -7,6 +8,9 @@ The sample contains a single notebook [main_notebook.py](src/main_notebook.py) w
 This sample also shows how to [update the job if a job with the same name already exists](/.github/workflows/cicd.yml#L119). By default, if the CD pipeline publishes a job, it's a new job with a new job id even if another job with the same name already exists.
 
 Another small feature used in this sample is to use a [pre-commit config hook](.pre-commit-config.yaml) to run [detect-secrets](https://github.com/Yelp/detect-secrets) to prevent secrets from being checked into code.
+
+__What doesn't this sample demonstrate:__
+Both the notebook and the library code are bare minimum sample code, not meant to represent real world business logic.
 
 ## How it works
 
@@ -36,9 +40,17 @@ python -m build
 pip install --editable .
 ```
 
-3. From the project root, run `pytest test/unittests`, or run tests in VSCode.
+3. From the project root, run `pytest test/unittests`, or run tests in VSCode. <!-- markdownlint-disable MD029 -->
 
 ### Run integration tests
 
 1. In a bash shell, set the environment variables defined in .env by running `export $(cat .env | xargs)`
 1. Run [run_notebook_tests.sh](test/run_notebook_tests.sh). This will build and install library code as a wheel package and run the notebook as one-time job run.
+
+## How to run GitHub CI/CD workflow
+
+The GitHub workflow runs on [push or pull request to the main branch](.github/workflows/cicd.yml#L4).
+
+1. In GitHub repo __Settings__, create a environment `Databricks_Azure_Test`, and configure 3 environment secrets: `DATABRICKS_CLUSTERID`, `DATABRICKS_HOST`, and `DATABRICKS_TOKEN`. These are used for Databricks Connect to run the unit tests.
+1. Create another environment `Databricks_Azure_Production`, and configure 2 environment secrets: `DATABRICKS_HOST` and `DATABRICKS_TOKEN`. These are used to deploy Databricks jobs.
+1. Optionally add a reviewer for the `Databricks_Azure_Production` environment, so that the workflow will wait for a reviewer to approve the deployment.
